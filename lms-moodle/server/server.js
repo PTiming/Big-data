@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
@@ -12,6 +13,28 @@ connectDB();
 
 const app = express();
 
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Stricter rate limit for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 auth requests per windowMs
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again later.'
+  }
+});
+
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
@@ -19,6 +42,12 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply rate limiting to all requests
+app.use('/api/', limiter);
+
+// Apply stricter rate limiting to auth routes
+app.use('/api/auth/', authLimiter);
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

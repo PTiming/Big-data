@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Loading from '../common/Loading';
 import { moodleService, courseService, authService } from '../../services';
+import { truncateText } from '../../utils/sanitize';
 import './MoodleSync.css';
 
 const MoodleSync = () => {
@@ -222,9 +223,7 @@ const MoodleSync = () => {
                       <h3>{course.fullname}</h3>
                       <p className="shortname">{course.shortname}</p>
                       {course.summary && (
-                        <p className="summary" dangerouslySetInnerHTML={{ 
-                          __html: course.summary.substring(0, 100) + '...' 
-                        }} />
+                        <p className="summary">{truncateText(course.summary, 100)}</p>
                       )}
                     </div>
                     <button

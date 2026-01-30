@@ -5,6 +5,16 @@ class MoodleService {
     this.baseUrl = process.env.MOODLE_URL;
     this.token = process.env.MOODLE_TOKEN;
     this.wsPath = '/webservice/rest/server.php';
+    
+    // Validate configuration - warn if not set but allow service to be created
+    if (!this.baseUrl || !this.token) {
+      console.warn('Moodle configuration incomplete. MOODLE_URL and MOODLE_TOKEN must be set for Moodle integration to work.');
+    }
+  }
+  
+  // Check if Moodle is configured
+  isConfigured() {
+    return !!(this.baseUrl && this.token);
   }
 
   // Make API request to Moodle
@@ -50,9 +60,6 @@ class MoodleService {
 
   // Get user by ID
   async getUserById(userId) {
-    const params = {
-      'userids[0]': userId
-    };
     const result = await this.makeRequest('core_user_get_users_by_field', {
       field: 'id',
       'values[0]': userId
@@ -229,14 +236,12 @@ class MoodleService {
   // Get assignment submissions
   async getAssignmentSubmissions(assignmentId, status = '') {
     const params = {
-      assignmentids: assignmentId
+      'assignmentids[0]': assignmentId
     };
     if (status) {
       params.status = status;
     }
-    return await this.makeRequest('mod_assign_get_submissions', {
-      'assignmentids[0]': assignmentId
-    });
+    return await this.makeRequest('mod_assign_get_submissions', params);
   }
 
   // Get user's submission for an assignment

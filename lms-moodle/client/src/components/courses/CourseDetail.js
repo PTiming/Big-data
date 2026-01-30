@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Loading from '../common/Loading';
 import { courseService, moduleService, assignmentService } from '../../services';
+import { stripHtml } from '../../utils/sanitize';
 import './CourseDetail.css';
 
 const CourseDetail = () => {
@@ -254,7 +255,7 @@ const CourseDetail = () => {
           {activeTab === 'overview' && (
             <div className="course-overview">
               <h2>About This Course</h2>
-              <div className="description" dangerouslySetInnerHTML={{ __html: course.description }} />
+              <div className="description">{stripHtml(course.description)}</div>
               
               {course.tags?.length > 0 && (
                 <div className="tags">
